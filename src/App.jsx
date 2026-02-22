@@ -10,26 +10,21 @@ const FontStyle = () => (
 );
 
 // === カードのレイアウト定義 (キャンバスサイズ 1200 x 675) ===
-// 余白を埋めるために全体の高さを調整し、枠を大きくしました
-const Y_OFFSET = 45; // 全体をさらに少し下に下げてバランス調整
+const Y_OFFSET = 45; 
 const LAYOUT = {
   title: { x: 40, y: 10 + Y_OFFSET, w: 340, h: 60 },
-  
-  // 左列
   name: { x: 40, y: 90 + Y_OFFSET, w: 340, h: 95 },
   oshi1: { x: 40, y: 205 + Y_OFFSET, w: 340, h: 95 },
   oshi2_1: { x: 40, y: 320 + Y_OFFSET, w: 165, h: 110 },
   oshi2_2: { x: 215, y: 320 + Y_OFFSET, w: 165, h: 110 },
-  hobby: { x: 40, y: 450 + Y_OFFSET, w: 340, h: 140 }, // 高さを拡大
-
-  // 右列
+  hobby: { x: 40, y: 450 + Y_OFFSET, w: 340, h: 140 }, 
   love: { x: 820, y: 10 + Y_OFFSET, w: 340, h: 95 },
   song: { x: 820, y: 125 + Y_OFFSET, w: 340, h: 120 },
   collab: { x: 820, y: 265 + Y_OFFSET, w: 165, h: 95 },
   member: { x: 995, y: 265 + Y_OFFSET, w: 165, h: 95 },
   history: { x: 820, y: 380 + Y_OFFSET, w: 165, h: 95 },
   age: { x: 995, y: 380 + Y_OFFSET, w: 165, h: 95 },
-  free: { x: 820, y: 495 + Y_OFFSET, w: 340, h: 95 }, // 高さを調整
+  free: { x: 820, y: 495 + Y_OFFSET, w: 340, h: 95 }, 
 };
 
 const INITIAL_ITEMS = {
@@ -50,6 +45,8 @@ const INITIAL_ITEMS = {
 
 export default function App() {
   const [bgImage, setBgImage] = useState(null);
+  // ★背景の調整用ステートを追加
+  const [bgSettings, setBgSettings] = useState({ zoom: 100, offsetX: 0, offsetY: 0 }); 
   const [items, setItems] = useState(INITIAL_ITEMS);
   const canvasRef = useRef(null);
 
@@ -66,7 +63,11 @@ export default function App() {
       const reader = new FileReader();
       reader.onload = (event) => {
         const img = new Image();
-        img.onload = () => setBgImage(img);
+        img.onload = () => {
+          setBgImage(img);
+          // 新しい画像を読み込んだら設定をリセット
+          setBgSettings({ zoom: 100, offsetX: 0, offsetY: 0 });
+        };
         img.src = event.target.result;
       };
       reader.readAsDataURL(file);
@@ -85,18 +86,25 @@ export default function App() {
     if (bgImage) {
       const imgRatio = bgImage.width / bgImage.height;
       const canvasRatio = width / height;
-      let drawW, drawH, drawX, drawY;
+      let baseW, baseH;
+      
+      // 画像の基準サイズを計算
       if (imgRatio > canvasRatio) {
-        drawH = height;
-        drawW = bgImage.width * (height / bgImage.height);
-        drawX = (width - drawW) / 2;
-        drawY = 0;
+        baseH = height;
+        baseW = bgImage.width * (height / bgImage.height);
       } else {
-        drawW = width;
-        drawH = bgImage.height * (width / bgImage.width);
-        drawX = 0;
-        drawY = (height - drawH) / 2;
+        baseW = width;
+        baseH = bgImage.height * (width / bgImage.width);
       }
+
+      // ズームと移動(オフセット)を適用して描画
+      const scale = bgSettings.zoom / 100;
+      const drawW = baseW * scale;
+      const drawH = baseH * scale;
+      // 中央を基準に拡大縮小し、さらにオフセットを加える
+      const drawX = (width - drawW) / 2 + bgSettings.offsetX;
+      const drawY = (height - drawH) / 2 + bgSettings.offsetY;
+
       ctx.drawImage(bgImage, drawX, drawY, drawW, drawH);
     } else {
       const gradient = ctx.createLinearGradient(0, 0, width, height);
@@ -111,7 +119,7 @@ export default function App() {
       if (!layout) return;
       const { x, y, w, h } = layout;
       ctx.save();
-      const radius = 10; // 少し丸みを強めて柔らかい印象に
+      const radius = 10; 
       ctx.beginPath();
       ctx.moveTo(x + radius, y);
       ctx.lineTo(x + w - radius, y);
@@ -175,7 +183,7 @@ export default function App() {
       }
       ctx.restore();
     });
-  }, [bgImage, items]);
+  }, [bgImage, bgSettings, items]); // bgSettingsを依存配列に追加
 
   useEffect(() => {
     document.fonts.ready.then(() => drawCanvas());
@@ -275,6 +283,25 @@ export default function App() {
               <span className="text-sm font-bold text-pink-500">お気に入りの画像をアップ</span>
               <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
             </label>
+
+            {/* ★画像がアップロードされたら調整スライダーを表示 */}
+            {bgImage && (
+              <div className="mt-4 p-4 bg-white rounded-xl border border-pink-100 shadow-sm space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[11px] font-bold text-gray-400 w-16">ズーム</span>
+                  <input type="range" min="50" max="250" value={bgSettings.zoom} onChange={(e) => setBgSettings({...bgSettings, zoom: parseInt(e.target.value)})} className="flex-1 accent-pink-400" />
+                  <span className="text-[10px] text-gray-400 w-8 text-right">{bgSettings.zoom}%</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[11px] font-bold text-gray-400 w-16">ヨコ移動</span>
+                  <input type="range" min="-600" max="600" value={bgSettings.offsetX} onChange={(e) => setBgSettings({...bgSettings, offsetX: parseInt(e.target.value)})} className="flex-1 accent-pink-400" />
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[11px] font-bold text-gray-400 w-16">タテ移動</span>
+                  <input type="range" min="-600" max="600" value={bgSettings.offsetY} onChange={(e) => setBgSettings({...bgSettings, offsetY: parseInt(e.target.value)})} className="flex-1 accent-pink-400" />
+                </div>
+              </div>
+            )}
           </section>
 
           {/* カードタイトルセクション */}
