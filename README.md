@@ -1,16 +1,20 @@
-# React + Vite
+# 自己紹介カードメーカー
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 概要
+X(Twitter)等のSNSでシェアできるオリジナルの自己紹介画像を作成するWebアプリケーションです。
+URL: [https://self-intro-card.vercel.app/]
 
-Currently, two official plugins are available:
+## 作成の背景・目的
+ユーザーエンゲージメントを高めるツールとして、SNSでのバイラル（拡散）効果を狙った導線を設計・実装する経験を積むために個人開発しました。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 使用技術
+- **Frontend:** React (JavaScript)
+- **Build Tool:** Vite
+- **Styling:** Tailwind CSS
+- **API/Library:** HTML5 Canvas API, lucide-react (Icons)
+- **Deployment:** Vercel
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 工夫した点・UI/UXのこだわり
+- ユーザーが自分好みにカスタマイズできるよう、文字サイズ・文字色の変更機能や、背景画像の位置（ズーム・移動）調整機能を実装しました。
+- 作成した画像をワンクリックでダウンロードできるだけでなく、X（Twitter）の投稿画面をハッシュタグとサイトURL付きで動的に立ち上げる機能を組み込み、シームレスなシェア体験を実現しました。
+- 画面遷移を伴わないSPA（シングルページアプリケーション）として構築し、Canvas APIを用いたリアルタイムな画像合成処理をクライアントサイドのみで完結させています。
